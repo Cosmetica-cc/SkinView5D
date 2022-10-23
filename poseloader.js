@@ -27,19 +27,27 @@ const poses = {
         "armRight": [-2.7, 0, 0],
         "legLeft": [0.2, 0, 0.2],
         "legRight": [-0.1, 0, -0.3]
+    },
+    "standing": {
+        "body": [0, 0, 0],
+        "head": [0, 0, 0],
+        "armLeft": [0, 0, 0],
+        "armRight": [0, 0, 0],
+        "legLeft": [0, 0, 0],
+        "legRight": [0, 0, 0]
     }
 };
 const scenes = {
     "normal": {
         "pose": "run",
-        "playerRotation": [0, 0, 0],
+        "playerRotation": [0, Math.PI + 0.5, 0],
         "camera": [10, 5, 50],
         "cameraPostRotation": [0, 0, 0],
         "fov": 70,
         "lights": [
             {
                 "type": "point",
-                "position": [0, 15, 15]
+                "position": [0, 15, 100]
             }
         ],
         "backEquipment": "elytra",

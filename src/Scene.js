@@ -1,3 +1,5 @@
+import * as THREE from "three";
+import {OrbitControls} from "https://unpkg.com/three@0.143.0/examples/jsm/controls/OrbitControls.js";
 import * as ModelUtils from "./ModelUtils.js";
 
 function createRenderer(height, width, antialias) {
@@ -95,7 +97,7 @@ class Scene {
             this.renderer.setSize( options.canvas.width, options.canvas.height);
             this.renderer.shadowMap.enabled = true;
             this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-            // this.controls = new THREE.OrbitControls(this.camera, options.canvas);
+            this.controls = new OrbitControls(this.camera, options.canvas);
             function animate(obj, renderCallback) {
                 requestAnimationFrame(() => animate(obj, renderCallback));
                 if (renderCallback) renderCallback(obj);

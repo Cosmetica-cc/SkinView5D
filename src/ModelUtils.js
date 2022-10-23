@@ -1,3 +1,5 @@
+import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.143.0/build/three.module.js";
+
 function createGrouplessBox(xD, yD, zD, material, pX = 0, pY = 0, pZ = 0) {
     const geometry = new THREE.BoxGeometry(xD, yD, zD);
     const box = new THREE.Mesh(geometry, material);
@@ -84,7 +86,6 @@ async function importJsonModel(model, texture) {
             let mesh = new THREE.Mesh(box, material);
 
             if (element.rotation != undefined && element.rotation.angle % 360 != 0) {
-                console.log(element.rotation);
                 let angle = element.rotation.angle * Math.PI / 180;
                 let axis = new THREE.Vector3(0, 0, 0);
 
@@ -98,14 +99,15 @@ async function importJsonModel(model, texture) {
                     }
                     return true;
                 });
-                console.log(axis, angle);
-                mesh.position.sub(...element.rotation.origin);
+                mesh.position.sub(new THREE.Vector3(...element.rotation.origin));
                 mesh.position.applyAxisAngle(axis, angle);
-                mesh.position.add(...element.rotation.origin);
+                mesh.position.add(new THREE.Vector3(...element.rotation.origin));
                 mesh.rotateOnAxis(axis, angle);
             }
             group.add(mesh);
         });
+        group.scale.x = -1;
+        group.scale.z = -1;
         return group;
     } catch (e) {
         console.log(e);
@@ -160,7 +162,7 @@ function createTexture(source) {
             }
             image.onerror = e => {
                 console.log(e);
-                reject("The requested file does not exist!", source);
+                reject("The requested file does not exist! " + source);
             }
             image.src = source;
         } catch (e) {

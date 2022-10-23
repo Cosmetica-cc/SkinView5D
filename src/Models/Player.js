@@ -1,3 +1,4 @@
+import * as THREE from "three";
 import * as ModelUtils from "../ModelUtils.js";
 
 class Player {
@@ -16,9 +17,8 @@ class Player {
     }
 
     async build(skinTexture, options = {}) {
-        if (options.slim !== undefined) this.slim = !!options.slim;
+        if (options.slim != undefined) this.slim = !!options.slim;
         const armWidth = 4 - this.slim;
-        const armOffset = 0.5 * this.slim;
         this.skinTexture = await ModelUtils.createMaterial(skinTexture);
 
         this.body = ModelUtils.createBox(8, 12, 4, this.skinTexture, ...this.groupOffsets.body());
@@ -36,16 +36,16 @@ class Player {
         this.body.group.add(this.head.group);
 
         this.armLeft = ModelUtils.createBox(armWidth, 12, 4, this.skinTexture, ...this.groupOffsets.armLeft(), 1, -4, 0);
-        ModelUtils.setUVs(this.armLeft.box.geometry, 32, 48, 4, 12, 4, 64, 64);
+        ModelUtils.setUVs(this.armLeft.box.geometry, 32, 48, armWidth, 12, 4, 64, 64);
         this.sleeveLeft = ModelUtils.createGrouplessBox(armWidth + 0.5, 12.5, 4.5, this.skinTexture, 1, -4, 0);
-        ModelUtils.setUVs(this.sleeveLeft.geometry, 48, 48, 4, 12, 4, 64, 64);
+        ModelUtils.setUVs(this.sleeveLeft.geometry, 48, 48, armWidth, 12, 4, 64, 64);
         this.armLeft.group.add(this.sleeveLeft);
         this.body.group.add(this.armLeft.group);
 
         this.armRight = ModelUtils.createBox(armWidth, 12, 4, this.skinTexture, ...this.groupOffsets.armRight(), -1, -4, 0);
-        ModelUtils.setUVs(this.armRight.box.geometry, 40, 16, 4, 12, 4, 64, 64);
+        ModelUtils.setUVs(this.armRight.box.geometry, 40, 16, armWidth, 12, 4, 64, 64);
         this.sleeveRight = ModelUtils.createGrouplessBox(armWidth + 0.5, 12.5, 4.5, this.skinTexture, -1, -4, 0);
-        ModelUtils.setUVs(this.sleeveRight.geometry, 40, 32, 4, 12, 4, 64, 64);
+        ModelUtils.setUVs(this.sleeveRight.geometry, 40, 32, armWidth, 12, 4, 64, 64);
         this.armRight.group.add(this.sleeveRight);
         this.body.group.add(this.armRight.group);
 
@@ -127,8 +127,22 @@ class Player {
                     this.bodyPartNames.forEach(bodyPart => {
                         if (!Object.keys(step).includes(bodyPart)) return;
                         stepCount++;
+                        let partInfo = step[bodyPart];
                         setTimeout(() => {
-                            let partInfo = step[bodyPart];
+                            stepCount--;
+                            if (!stepCount && !finished) {
+                                finished = true;
+                                console.log("animation has finished!");
+                                this.bodyPartNames.forEach(bodyPart => {
+                                    console.log(this[bodyPart].group.rotation.x % (Math.PI * 2), this[bodyPart].group.rotation.y % (Math.PI * 2), this[bodyPart].group.rotation.z % (Math.PI * 2));
+                                    this[bodyPart].group.rotation.x = this[bodyPart].group.rotation.x % (Math.PI * 2);
+                                    this[bodyPart].group.rotation.y = this[bodyPart].group.rotation.y % (Math.PI * 2);
+                                    this[bodyPart].group.rotation.z = this[bodyPart].group.rotation.z % (Math.PI * 2);
+                                });
+                                setTimeout(resolve, 10);
+                            }
+                        }, ((partInfo.duration || 0.1) + time) * 1000 / speed);
+                        setTimeout(() => {
                             axisNames.forEach(axis => {
                                 if (partInfo[axis] == undefined || partInfo[axis] == null) return;
                                 ModelUtils.lerp(this[bodyPart].group.rotation[axis], partInfo[axis], (partInfo.duration || 0.1) / speed, value => {
@@ -144,19 +158,6 @@ class Player {
                                     if (!finished) this[bodyPart].group.position[axis] = value;
                                 });
                             });
-                            setTimeout(() => {
-                                stepCount--;
-                                if (!stepCount && !finished) {
-                                    finished = true;
-                                    console.log("animation has finished!");
-                                    this.bodyPartNames.forEach(bodyPart => {
-                                        this[bodyPart].group.rotation.x = this[bodyPart].group.rotation.x % (Math.PI * 2);
-                                        this[bodyPart].group.rotation.y = this[bodyPart].group.rotation.y % (Math.PI * 2);
-                                        this[bodyPart].group.rotation.z = this[bodyPart].group.rotation.z % (Math.PI * 2);
-                                    });
-                                    setTimeout(resolve);
-                                }
-                            }, (partInfo.duration || 0.1) / speed);
                         }, (time * 1000) / speed);
                     });
                 });
