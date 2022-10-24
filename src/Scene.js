@@ -79,7 +79,6 @@ class Scene {
         this.composer.setPixelRatio(pixelRatio);
         this.fxaaPass.material.uniforms["resolution"].value.x = 1 / (this.width * pixelRatio);
         this.fxaaPass.material.uniforms["resolution"].value.y = 1 / (this.height * pixelRatio);
-        console.log("updating");
     }
 
     constructor(options) {

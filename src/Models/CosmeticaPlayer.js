@@ -61,21 +61,21 @@ class CosmeticaPlayer {
                                     model.position.sub(new THREE.Vector3(-8, -2, -8));
                                 }
                             } else {
-                                model.scale.x *= -1;
+                                let inverse = !(options.shoulderBuddies[side].extraInfo & 2);
+                                if (inverse) model.scale.x *= -1;
                                 if (options.shoulderBuddies[side].extraInfo & 1) {
                                     this.player.body.group.add(model);
-                                    model.position.sub(new THREE.Vector3(14, -5.5, -8));
+                                    model.position.sub(new THREE.Vector3(inverse ? 14 : -2, -5.5, -8));
                                 } else {
                                     this.player.armRight.group.add(model);
-                                    model.position.sub(new THREE.Vector3(8, -2, -8));
+                                    model.position.sub(new THREE.Vector3(inverse ? 8 : -8, -2, -8));
                                 }
                             }
                         });
                     }
                 });
             }
-
-            if (options.backBling && options.backBling.model && options.backBling.texture) {
+            if (options.backBling && options.backBling.model && options.backBling.texture && (!options.cape || !!(options.backBling.extraInfo & 2))) {
                 let i = 0;
                 makeCosmeticModel("backbling-" + ++i, options.backBling.model, options.backBling.texture).then(model => {
                     model.position.sub(new THREE.Vector3(-8, 0, -6));
