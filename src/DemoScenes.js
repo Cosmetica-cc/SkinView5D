@@ -1,4 +1,4 @@
-import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.143.0/build/three.module.js";
+import * as THREE from "three";
 import * as Scene from "./Scene.js";
 import {CosmeticaPlayer} from "./Models/CosmeticaPlayer.js";
 
@@ -20,23 +20,23 @@ function createScene(sceneType, options = {}) {
         });
         (async () => {
             try {
-                console.log("making player");
                 const player = new CosmeticaPlayer();
                 scene.player = player;
-                console.log("made player");
                 await player.build(options);
-                console.log("built models");
                 player.player.root.rotation.set(...sceneInfo.playerRotation);
                 scene.scene.add(player.player.root);
                 player.player.pose(sceneInfo.pose);
                 sceneInfo.lights.forEach(lightInfo => {
-                    let light = lightInfo.type == "point" ? new THREE.PointLight() : new THREE.AmbientLight();
-                    light.position.set(...lightInfo.position);
-                    light.castShadow = true;
-                    scene.scene.add(light);
+                    let light = lightInfo.type == "point" ? new THREE.PointLight(0xffffff, lightInfo.intensity || 1) : new THREE.AmbientLight(0xffffff, lightInfo.intensity || 1);
+                    if (lightInfo.position == "camera") {
+                        light.position.set(0, 0, 0);
+                        scene.camera.add(light);
+                    } else {
+                        light.position.set(...lightInfo.position);
+                        scene.scene.add(light);
+                    }
                 })
                 scene.camera.position.set(...sceneInfo.camera);
-                console.log("updating camera");
                 scene.camera.lookAt(player.player.root.position);
                 scene.camera.rotateX(sceneInfo.cameraPostRotation[0]).rotateY(sceneInfo.cameraPostRotation[1]).rotateZ(sceneInfo.cameraPostRotation[2]);
                 if (scene.controls) scene.controls.update();

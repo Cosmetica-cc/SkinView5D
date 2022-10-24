@@ -7,22 +7,35 @@ import * as DemoScenes from "./src/DemoScenes.js";
     canvas.height = 1000;
     document.body.appendChild(canvas);
     fetch("https://api.cosmetica.cc/v2/get/info?user=" + location.hash.substring(1)).then(r => r.json()).then(async response => {
-        delete response.panorama;
         const scene = await DemoScenes.createScene("normal", {
             canvas,
+            backEquipment: "cape",
             ...response,
+            panorama: `https://cosmetica.cc/page/panoramas/${response.panorama}.jpg`,
             renderCallback: (scene) => {
                 if (!scene.player) return;
-                scene.player.player.root.rotateY(0.01);
+                // scene.player.player.root.rotateY(0.001);
             }
         });
-        function animate() {
-            // scene.player.player.pose("standing");
-            // setTimeout(() => {
-            //     scene.player.player.animate(animations.defaultDance)
-            //     .then(animate);
-            // }, 50);
-            scene.player.player.animate(animations.run, 1).then(animate)
+        async function animate() {
+            let list = ["run", "run", "backflip", "run", "wave", "idle", "sleepy"];
+            // let list = ["idle", "sleepy"];
+
+            for (let i = 0; i < list.length; i++) {
+                await scene.player.player.animate(animations[list[i]]);
+            }
+            animate();
+
+
+            //scene.player.player.animate(animations.sleepy, 1)
+            // while (step >= 4) step -= 4;
+            // let animation = ++step == 3 ? animations.sleepy : animations.idle;
+            // // // scene.player.player.pose("standing");
+            // // // setTimeout(() => {
+            // // //     scene.player.player.animate(animations.defaultDance)
+            // // //     .then(animate);
+            // // // }, 50);
+            // scene.player.player.animate(animation, 1).then(() => animate(step));
             // .then(() => {
             //     scene.player.player.animate(animations.backflip, 1).then(animate)
             //     // .then(() => {

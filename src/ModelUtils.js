@@ -1,4 +1,4 @@
-import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.143.0/build/three.module.js";
+import * as THREE from "three";
 
 function createGrouplessBox(xD, yD, zD, material, pX = 0, pY = 0, pZ = 0) {
     const geometry = new THREE.BoxGeometry(xD, yD, zD);
@@ -148,6 +148,7 @@ function createTexture(source) {
     return new Promise((resolve, reject) => {
         try {
             const image = new Image();
+            image.crossOrigin = "anonymous";
             image.onload = () => {
                 let imageCanvas = document.createElement("canvas");
                 imageCanvas.width = image.width;
@@ -172,6 +173,7 @@ function createTexture(source) {
 }
 
 async function createMaterial(source, opaque = false) {
+    if (source.isMaterial) return source;
     return new THREE.MeshStandardMaterial({
         map: await createTexture(source),
         side: THREE.DoubleSide,
@@ -181,7 +183,7 @@ async function createMaterial(source, opaque = false) {
 }
 
 function lerp(start, end, duration, callback) {
-    if (start == end) return;
+    if (start == end) return callback(end, true);
     const max = Math.max(start, end);
     const min = Math.min(start, end);
     const delta = end - start;
@@ -189,7 +191,7 @@ function lerp(start, end, duration, callback) {
     function animate() {
         let value = Math.min(max, Math.max(min, start + delta * (new Date().getTime() - startTime) / duration / 1000));
         if (value != end) requestAnimationFrame(animate);
-        callback(value);
+        callback(value, value == end);
     }
     animate();
 }

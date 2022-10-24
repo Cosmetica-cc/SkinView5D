@@ -1,4 +1,4 @@
-import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.143.0/build/three.module.js";
+import * as THREE from "three";
 import {Player} from "./Player.js";
 import * as ModelUtils from "../ModelUtils.js";
 
@@ -85,7 +85,45 @@ class CosmeticaPlayer {
             }
 
             if (options.cape) {
-                this.player.setCape(options.cape.image);
+                awaitingComponents.push("cape");
+                let img = new Image();
+                img.onload = () => {
+                    let width = img.width;
+                    let height = img.height;
+                    let frameHeight = width / 2;
+                    if (height % frameHeight != 0) return console.log("Cape wasn't right dimensions!");
+                    let frameCount = height / frameHeight;
+                    let frames = [];
+                    let capeCanvas = document.createElement("canvas");
+                    capeCanvas.width = width;
+                    capeCanvas.height = frameHeight;
+                    let ctx = capeCanvas.getContext("2d");
+                    for (let i = 0; i < frameCount; i++) {
+                        ctx.clearRect(0, 0, width, frameHeight);
+                        ctx.drawImage(img, 0, frameHeight * i, width, frameHeight, 0, 0, width, frameHeight);
+                        ModelUtils.createMaterial(capeCanvas.toDataURL()).then(material => {
+                            frames.push(material);
+                            if (frames.length != frameCount) return;
+                            this.player.setCape(frames[0]);
+                            checkCompletion("cape");
+                            if (!options.cape.extraInfo || frameCount.length == 1) {
+                            } else {
+                                let i = 0;
+                                let loop = setInterval(() => {
+                                    if (!frames.includes(this.player.capeMaterial)) {
+                                        clearInterval(loop);
+                                        console.log("Cape has been changed! stopping the animation...");
+                                        return;
+                                    }
+                                    i++;
+                                    while (i >= frameCount) i -= frameCount;
+                                    this.player.setCape(frames[i]);
+                                }, options.cape.extraInfo);
+                            }
+                        });
+                    }
+                }
+                img.src = options.cape.image;
             }
 
             if (!awaitingComponents.length) checkCompletion();

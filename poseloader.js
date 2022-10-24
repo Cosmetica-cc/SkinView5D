@@ -40,14 +40,20 @@ const poses = {
 const scenes = {
     "normal": {
         "pose": "run",
-        "playerRotation": [0, Math.PI + 0.5, 0],
+        "playerRotation": [0, 0.5, 0],
         "camera": [10, 5, 50],
         "cameraPostRotation": [0, 0, 0],
         "fov": 70,
         "lights": [
             {
+                "type": "ambient",
+                "intensity": 0.4,
+                "position": [0, 0, 0]
+            },
+            {
                 "type": "point",
-                "position": [0, 15, 100]
+                "intensity": 0.6,
+                "position": "camera"
             }
         ],
         "backEquipment": "elytra",
