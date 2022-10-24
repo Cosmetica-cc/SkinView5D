@@ -48,7 +48,7 @@ class Player {
     async build(skinTexture, options = {}) {
         if (options.slim != undefined) this.slim = !!options.slim;
         const armWidth = 4 - this.slim;
-        this.skinTexture = await ModelUtils.createMaterial(skinTexture);
+        this.skinTexture = await ModelUtils.createMaterial(skinTexture || "./skin.png");
 
         this.body = ModelUtils.createBox(8, 12, 4, this.skinTexture, ...this.groupOffsets.body());
         ModelUtils.setUVs(this.body.box.geometry, 16, 16, 8, 12, 4, 64, 64);

@@ -9,7 +9,6 @@ function createScene(sceneType, options = {}) {
         let parts = {player: 1, scene: 1};
         const scene = new Scene.Scene({
             ...options,
-            //panorama: options.panorama ? `https://cosmetica.cc/page/panoramas/${options.panorama}.jpg` : null,
             fov: sceneInfo.fov,
             readyCallback: async () => {
                 delete parts.scene;
