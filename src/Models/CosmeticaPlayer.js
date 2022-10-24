@@ -2,6 +2,54 @@ import * as THREE from "three";
 import {Player} from "./Player.js";
 import * as ModelUtils from "../ModelUtils.js";
 
+function createCosmetic(type, data, player) {
+    return new Promise((resolve, reject) => {
+        ModelUtils.importJsonModel(data.model, data.texture)
+        .then(model => {
+            model.scale.add(new THREE.Vector3(0.01, 0.01, 0.01));
+            switch (type) {
+                case "hat":
+                    model.position.sub(new THREE.Vector3(-8, -8, -8));
+                    player.head.group.add(model);
+                    resolve(model);
+                    break;
+                case "shoulderBuddyLeft":
+                    if (data.extraInfo & 1) {
+                        player.body.group.add(model);
+                        model.position.sub(new THREE.Vector3(-14, -5.5, -8));
+                    } else {
+                        player.armLeft.group.add(model);
+                        model.position.sub(new THREE.Vector3(-8, -2, -8));
+                    }
+                    resolve(model);
+                    break;
+                case "shoulderBuddyRight":
+                    let inverse = !(data.extraInfo & 2);
+                    if (inverse) model.scale.x *= -1;
+                    if (data.extraInfo & 1) {
+                        player.body.group.add(model);
+                        model.position.sub(new THREE.Vector3(inverse ? 14 : -2, -5.5, -8));
+                    } else {
+                        player.armRight.group.add(model);
+                        model.position.sub(new THREE.Vector3(inverse ? 8 : -8, -2, -8));
+                    }
+                    resolve(model);
+                    break;
+                case "backBling":
+                    model.position.sub(new THREE.Vector3(-8, 0, -6));
+                    player.body.group.add(model);
+                    resolve(model);
+                    break;
+                default:
+                    reject(`Cosmetic type ${type} is unknown!`);
+            }
+        }).catch(e => {
+            console.log(e);
+            reject(e);
+        })
+    });
+}
+
 class CosmeticaPlayer {
     constructor() {
         this.player = new Player();
@@ -18,70 +66,28 @@ class CosmeticaPlayer {
                 if (!awaitingComponents.length) resolve();
             }
 
-            function makeCosmeticModel(id, model, texture) {
-                awaitingComponents.push(id);
-                return new Promise((resolve, reject) => {
-                    ModelUtils.importJsonModel(model, texture)
-                    .then(model => {
-                        resolve(model);
-                        checkCompletion(id);
-                    }).catch(e => {
-                        console.log(e);
-                        reject();
-                        checkCompletion(id);
-                    });
-                });
-            }
-
             if (options.hats) {
                 let i = 0;
                 options.hats.forEach(hat => {
                     if (hat.model && hat.texture) {
-                        makeCosmeticModel("hat-" + ++i, hat.model, hat.texture).then(model => {
-                            model.position.sub(new THREE.Vector3(-8, -8, -8));
-                            this.player.head.group.add(model);
-                            model.scale.add(new THREE.Vector3(0.01, 0.01, 0.01));
-                        });
+                        let id = ++i;
+                        awaitingComponents.push("hat-" + id);
+                        createCosmetic("hat", hat, this.player).then(() => checkCompletion("hat-" + id));
                     }
                 });
             }
 
             if (options.shoulderBuddies) {
-                let i = 0;
                 ["left", "right"].forEach(side => {
                     if (options.shoulderBuddies[side] && options.shoulderBuddies[side].model && options.shoulderBuddies[side].texture) {
-                        makeCosmeticModel("shoulderbuddy-" + ++i, options.shoulderBuddies[side].model, options.shoulderBuddies[side].texture).then(model => {
-                            model.scale.add(new THREE.Vector3(0.01, 0.01, 0.01));
-                            if (side == "left") {
-                                if (options.shoulderBuddies[side].extraInfo & 1) {
-                                    this.player.body.group.add(model);
-                                    model.position.sub(new THREE.Vector3(-14, -5.5, -8));
-                                } else {
-                                    this.player.armLeft.group.add(model);
-                                    model.position.sub(new THREE.Vector3(-8, -2, -8));
-                                }
-                            } else {
-                                let inverse = !(options.shoulderBuddies[side].extraInfo & 2);
-                                if (inverse) model.scale.x *= -1;
-                                if (options.shoulderBuddies[side].extraInfo & 1) {
-                                    this.player.body.group.add(model);
-                                    model.position.sub(new THREE.Vector3(inverse ? 14 : -2, -5.5, -8));
-                                } else {
-                                    this.player.armRight.group.add(model);
-                                    model.position.sub(new THREE.Vector3(inverse ? 8 : -8, -2, -8));
-                                }
-                            }
-                        });
+                        awaitingComponents.push("shoulderbuddy-" + side);
+                        createCosmetic("shoulderBuddy" + side.slice(0, 1).toUpperCase() + side.slice(1), options.shoulderBuddies[side], this.player).then(() => checkCompletion("shoulderbuddy-" + side));
                     }
                 });
             }
             if (options.backBling && options.backBling.model && options.backBling.texture && (!options.cape || !!(options.backBling.extraInfo & 2))) {
-                let i = 0;
-                makeCosmeticModel("backbling-" + ++i, options.backBling.model, options.backBling.texture).then(model => {
-                    model.position.sub(new THREE.Vector3(-8, 0, -6));
-                    this.player.body.group.add(model);
-                    model.scale.add(new THREE.Vector3(0.01, 0.01, 0.01));
-                });
+                awaitingComponents.push("backbling");
+                createCosmetic("backbling", options.backBling, this.player).then(() => checkCompletion("backbling"));
             }
 
             if (options.cape) {
@@ -132,5 +138,6 @@ class CosmeticaPlayer {
 }
 
 export {
-    CosmeticaPlayer
+    CosmeticaPlayer,
+    createCosmetic
 }

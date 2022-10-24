@@ -1,3 +1,4 @@
+// import * as DemoScenes from "https://cdn.jsdelivr.net/gh/eyezahhhh/SkinView5D/src/DemoScenes.js";
 import * as DemoScenes from "./src/DemoScenes.js";
 
 (async () => {
@@ -10,6 +11,7 @@ import * as DemoScenes from "./src/DemoScenes.js";
         const scene = await DemoScenes.createScene("normal", {
             canvas,
             backEquipment: "cape",
+            downsample: 2,
             ...response,
             panorama: `https://cosmetica.cc/page/panoramas/${response.panorama}.jpg`,
             renderCallback: (scene) => {
@@ -25,31 +27,7 @@ import * as DemoScenes from "./src/DemoScenes.js";
                 await scene.player.player.animate(animations[list[i]]);
             }
             animate();
-
-
-            //scene.player.player.animate(animations.sleepy, 1)
-            // while (step >= 4) step -= 4;
-            // let animation = ++step == 3 ? animations.sleepy : animations.idle;
-            // // // scene.player.player.pose("standing");
-            // // // setTimeout(() => {
-            // // //     scene.player.player.animate(animations.defaultDance)
-            // // //     .then(animate);
-            // // // }, 50);
-            // scene.player.player.animate(animation, 1).then(() => animate(step));
-            // .then(() => {
-            //     scene.player.player.animate(animations.backflip, 1).then(animate)
-            //     // .then(() => {
-            //     //     scene.player.player.animate(animations.barrelRoll, 1.3).then(animate);
-            //     // });
-            // });
         }
         setTimeout(animate, 500);
     });
-    // setInterval(() => {
-    //     const image = Scene.drawScene(scene.scene, scene.camera, 500, 500, "image/png", false);
-
-    //     const element = document.createElement("img");
-    //     element.src = image;
-    //     document.body.appendChild(element);
-    // }, 1000);
 })();

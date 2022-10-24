@@ -112,10 +112,12 @@ class Scene {
             this.composer.addPass(this.fxaaPass);
             this.updateComposerSize();
 
+            const downsampleFactor = options.downsample || 1;
+
             function updateSize(instance) {
-                options.canvas.width = options.canvas.offsetWidth;
-                options.canvas.height = options.canvas.offsetHeight;
-                instance.renderer.setSize(options.canvas.offsetWidth, options.canvas.offsetHeight, false);
+                options.canvas.width = options.canvas.offsetWidth * downsampleFactor;
+                options.canvas.height = options.canvas.offsetHeight * downsampleFactor;
+                instance.renderer.setSize(options.canvas.offsetWidth * downsampleFactor, options.canvas.offsetHeight * downsampleFactor, false);
                 instance.camera.aspect = options.canvas.offsetWidth / options.canvas.offsetHeight;
                 instance.camera.updateProjectionMatrix();
             }
