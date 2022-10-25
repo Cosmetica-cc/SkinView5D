@@ -14,6 +14,7 @@ class Player {
         };
         this.root = new THREE.Group();
         this.slim = false;
+        this.backEquipment = "cape";
     }
 
     updateElytraSpread(angle) {
@@ -28,6 +29,7 @@ class Player {
         source = await ModelUtils.createMaterial(source);
         this.capeMaterial = source;
         ["cape", "elytraWingLeft", "elytraWingRight"].forEach(box => this[box].box.material = source);
+        this.setBackEquipment(this.backEquipment);
     }
 
     setBackEquipment(type) {
@@ -93,19 +95,19 @@ class Player {
         this.body.group.add(this.legRight.group);
 
         this.initialCapeMaterial = new THREE.MeshBasicMaterial( { color: 0xffff00 } );
-        this.capeMaterial = this.initialCapeMaterial;
+        this.capeMaterial = options.capeTexture ? ModelUtils.createMaterial(options.capeTexture) : this.initialCapeMaterial;
 
-        this.cape = ModelUtils.createBox(10, 16, 1, this.initialCapeMaterial, 0, 6, -3, 0, -8, 1);
+        this.cape = ModelUtils.createBox(10, 16, 1, this.capeMaterial, 0, 6, -3, 0, -8, 1);
         ModelUtils.setUVs(this.cape.box.geometry, 0, 0, 10, 16, 1, 64, 32);
         this.cape.box.scale.z = -1;
         this.cape.box.scale.x = -1;
         this.cape.group.rotateX(0.1);
         this.body.group.add(this.cape.group);
 
-        this.elytraWingLeft = ModelUtils.createBox(12, 22, 4, this.initialCapeMaterial, 5, 5, -2, -5, -10, -1);
+        this.elytraWingLeft = ModelUtils.createBox(12, 22, 4, this.capeMaterial, 5, 5, -2, -5, -10, -1);
         ModelUtils.setUVs(this.elytraWingLeft.box.geometry, 22, 0, 10, 20, 2, 64, 32);
         this.elytraWingLeft.group.rotation.y = 0.1;
-        this.elytraWingRight = ModelUtils.createBox(12, 22, 4, this.initialCapeMaterial, -5, 5, -2, 5, -10, -1);
+        this.elytraWingRight = ModelUtils.createBox(12, 22, 4, this.capeMaterial, -5, 5, -2, 5, -10, -1);
         ModelUtils.setUVs(this.elytraWingRight.box.geometry, 22, 0, 10, 20, 2, 64, 32);
         this.elytraWingRight.group.rotation.y = -0.1;
         this.elytraWingRight.box.scale.x = -1;
@@ -114,6 +116,7 @@ class Player {
         this.elytra.add(this.elytraWingRight.group);
         this.updateElytraSpread(0.2617994);
         this.setBackEquipment(options.backEquipment);
+        this.backEquipment = options.backEquipment == "elytra" ? "elytra" : "cape";
         this.body.group.add(this.elytra);
 
         this.root.add(this.body.group);
