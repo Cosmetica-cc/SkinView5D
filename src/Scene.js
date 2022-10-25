@@ -7,13 +7,14 @@ import {ShaderPass} from "https://unpkg.com/three@0.143.0/examples/jsm/postproce
 import {FXAAShader} from "https://unpkg.com/three@0.143.0/examples/jsm/shaders/FXAAShader.js";
 import * as ModelUtils from "./ModelUtils.js";
 
-function createRenderer(width, height, antialias) {
+function createRenderer(width, height, antialias, alpha) {
     // three.js expects a canvas, this fakes it lmfao
     const canvas = document.createElement("canvas");
 
     const renderer = new THREE.WebGLRenderer({
         canvas,
         antialias: antialias,
+        alpha: alpha,
         powerPreference: "high-performance"
     });
 
@@ -31,8 +32,8 @@ function createRenderer(width, height, antialias) {
     return renderer;
 }
 
-function drawScene(scene, camera, width, height, imageType, antialias) {
-    const renderer = createRenderer(width, height, antialias);
+function drawScene(scene, camera, width, height, imageType, antialias, alpha) {
+    const renderer = createRenderer(width, height, antialias, alpha);
     renderer.render(scene, camera);
     const frameBufferPixels = new Uint8Array(width * height * 4);
     const context = renderer.getContext();
@@ -102,6 +103,7 @@ class Scene {
         if (options.canvas) {
             this.renderer = new THREE.WebGLRenderer({
                 canvas: options.canvas,
+                alpha: options.alpha || false,
                 powerPreference: "high-performance",
                 antialias: true
             });
