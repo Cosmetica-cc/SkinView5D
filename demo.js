@@ -15,6 +15,7 @@ import Animations from "./animations.js";
             backEquipment: "cape",
             downsample: 2,
             ...response,
+            alpha: true,
             // panorama: `https://cosmetica.cc/page/panoramas/${response.panorama}.jpg`,
             renderCallback: (scene) => {
                 if (!scene.player) return;
