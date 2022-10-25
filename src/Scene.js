@@ -92,7 +92,7 @@ class Scene {
         function checkCompletion(id) {
             let index = awaitingComponents.indexOf(id);
             if (index >= 0) awaitingComponents.splice(index, 1);
-            if (!awaitingComponents.length && options.readyCallback) options.readyCallback();
+            if (!awaitingComponents.length && options.readyCallback) options.readyCallback(this);
         }
 
         if (options.panorama) {
