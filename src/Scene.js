@@ -7,7 +7,7 @@ import {ShaderPass} from "https://unpkg.com/three@0.143.0/examples/jsm/postproce
 import {FXAAShader} from "https://unpkg.com/three@0.143.0/examples/jsm/shaders/FXAAShader.js";
 import * as ModelUtils from "./ModelUtils.js";
 
-function createRenderer(height, width, antialias) {
+function createRenderer(width, height, antialias) {
     // three.js expects a canvas, this fakes it lmfao
     const canvas = document.createElement("canvas");
 
