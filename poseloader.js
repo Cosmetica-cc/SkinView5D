@@ -99,7 +99,7 @@ const scenes = {
 
 function getScene(id) {
     if (!Object.keys(scenes).includes(id)) throw "Unknown scene: " + id;
-    var out = scenes[id];
+    var out = JSON.parse(JSON.stringify(scenes[id]));
     if (!Object.keys(poses).includes(out.pose)) throw "Unknown pose: " + out.pose;
     out.pose = poses[out.pose];
     return out;

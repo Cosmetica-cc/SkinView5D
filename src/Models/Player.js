@@ -120,7 +120,6 @@ class Player {
     }
 
     pose(pose) {
-        if (typeof pose == "string" && Object.keys(poses).includes(pose)) pose = poses[pose];
         this.bodyPartNames.forEach(part => {
             if (!pose[part] || !Array.isArray(pose[part])) return;
             const axis = ["x", "y", "z"];
