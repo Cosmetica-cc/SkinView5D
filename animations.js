@@ -1079,4 +1079,6 @@ const animations = {
     ]
 }
 
-export default animations;
+export {
+    animations
+}
