@@ -1,16 +1,19 @@
+import * as THREE from "three";
 import * as Scene from "./Scene.js";
 import {CosmeticaPlayer} from "./Models/CosmeticaPlayer.js";
 
-function createScene(sceneType, options = {}) {
-    if (!Object.keys(scenes).includes(sceneType)) throw "Scene does not exist!";
-    const sceneInfo = scenes[sceneType];
+async function createScene(sceneType, options = {}) {
+    var sceneInfo = sceneType;
+    // if (typeof sceneType == "string") {
+    //     if (!scenes.length) scenes = await getFile("../demoScenes.json", true);
+    //     if (!Object.keys(scenes).includes(sceneType)) throw "Scene does not exist!";
+    //     scenes[sceneType];
+    // }
     return new Promise((resolve, reject) => {
-        const skin = options.skin || "../path.png";
         let parts = {player: 1, scene: 1};
         const scene = new Scene.Scene({
-            panorama: sceneInfo.panorama,
-            fov: sceneInfo.fov,
             ...options,
+            fov: sceneInfo.fov,
             readyCallback: async () => {
                 delete parts.scene;
                 if (!Object.keys(parts).length) {
@@ -20,33 +23,23 @@ function createScene(sceneType, options = {}) {
         });
         (async () => {
             try {
-                console.log("making player");
                 const player = new CosmeticaPlayer();
                 scene.player = player;
-                console.log("made player");
-                await player.build("./skin.png", {
-                    slim: !!options.slim,
-                    hat: {  
-                        model: models[1],
-                        texture: "hat.png"
-                    },
-                    shoulderBuddy: {
-                        model: models[0],
-                        texture: "model.png"
-                    }
-                });
-                console.log("built models");
+                await player.build(options);
                 player.player.root.rotation.set(...sceneInfo.playerRotation);
                 scene.scene.add(player.player.root);
                 player.player.pose(sceneInfo.pose);
                 sceneInfo.lights.forEach(lightInfo => {
-                    let light = lightInfo.type == "point" ? new THREE.PointLight() : new THREE.AmbientLight();
-                    light.position.set(...lightInfo.position);
-                    light.castShadow = true;
-                    scene.scene.add(light);
+                    let light = lightInfo.type == "point" ? new THREE.PointLight(0xffffff, lightInfo.intensity || 1) : new THREE.AmbientLight(0xffffff, lightInfo.intensity || 1);
+                    if (lightInfo.position == "camera") {
+                        light.position.set(0, 0, 0);
+                        scene.camera.add(light);
+                    } else {
+                        light.position.set(...lightInfo.position);
+                        scene.scene.add(light);
+                    }
                 })
                 scene.camera.position.set(...sceneInfo.camera);
-                console.log("updating camera");
                 scene.camera.lookAt(player.player.root.position);
                 scene.camera.rotateX(sceneInfo.cameraPostRotation[0]).rotateY(sceneInfo.cameraPostRotation[1]).rotateZ(sceneInfo.cameraPostRotation[2]);
                 if (scene.controls) scene.controls.update();

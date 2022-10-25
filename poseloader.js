@@ -27,19 +27,33 @@ const poses = {
         "armRight": [-2.7, 0, 0],
         "legLeft": [0.2, 0, 0.2],
         "legRight": [-0.1, 0, -0.3]
+    },
+    "standing": {
+        "body": [0, 0, 0],
+        "head": [0, 0, 0],
+        "armLeft": [0, 0, 0],
+        "armRight": [0, 0, 0],
+        "legLeft": [0, 0, 0],
+        "legRight": [0, 0, 0]
     }
 };
 const scenes = {
     "normal": {
         "pose": "run",
-        "playerRotation": [0, 0, 0],
+        "playerRotation": [0, 0.5, 0],
         "camera": [10, 5, 50],
         "cameraPostRotation": [0, 0, 0],
         "fov": 70,
         "lights": [
             {
+                "type": "ambient",
+                "intensity": 0.4,
+                "position": [0, 0, 0]
+            },
+            {
                 "type": "point",
-                "position": [0, 15, 15]
+                "intensity": 0.6,
+                "position": "camera"
             }
         ],
         "backEquipment": "elytra",
@@ -82,3 +96,17 @@ const scenes = {
         "fixedPano": false
     }
 };
+
+function getScene(id) {
+    if (!Object.keys(scenes).includes(id)) throw "Unknown scene: " + id;
+    var out = JSON.parse(JSON.stringify(scenes[id]));
+    if (!Object.keys(poses).includes(out.pose)) throw "Unknown pose: " + out.pose;
+    out.pose = poses[out.pose];
+    return out;
+}
+
+export {
+    poses,
+    scenes,
+    getScene
+}

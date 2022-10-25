@@ -1,38 +1,36 @@
-import * as Scene from "./src/Scene.js";
-import * as DemoScenes from "./src/DemoScenes.js";
+// import * as DemoScenes from "https://cdn.jsdelivr.net/gh/eyezahhhh/SkinView5D/src/DemoScenes.js";
+import * as DemoScenes from "skinview5d";
+import * as DemoPoses from "./poseloader.js";
+import { animations } from "./animations.js";
 
 (async () => {
-    //const image = await createScene();
     const canvas = document.createElement("canvas");
-    canvas.width = 500;
-    canvas.height = 500;
+    canvas.width = 1000;
+    canvas.height = 1000;
     document.body.appendChild(canvas);
-    const scene = await DemoScenes.createScene("normal", {
-        canvas,
-        slim: true,
-        renderCallback: (scene) => {
-            if (!scene.player) return;
-            // scene.player.player.root.rotateY(0.01);
-        }
-    });
-    function animate() {
-        scene.player.player.animate(animations.run, 1)
-        .then(() => {
-            scene.player.player.animate(animations.backflip, 1)
-            .then(() => {
-                scene.player.player.animate(animations.barrelRoll, 1)
-                .then(() => {
-                    animate();
-                });
-            });
+    fetch("https://api.cosmetica.cc/v2/get/info?user=" + location.hash.substring(1)).then(r => r.json()).then(async response => {
+        delete response.panorama;
+        const scene = await DemoScenes.createScene(DemoPoses.getScene("normal"), {
+            canvas,
+            backEquipment: "cape",
+            downsample: 2,
+            ...response,
+            alpha: true,
+            // panorama: `https://cosmetica.cc/page/panoramas/${response.panorama}.jpg`,
+            renderCallback: (scene) => {
+                if (!scene.player) return;
+                // scene.player.player.root.rotateY(0.001);
+            }
         });
-    }
-    setTimeout(animate, 1000);
-    // setInterval(() => {
-    //     const image = Scene.drawScene(scene.scene, scene.camera, 500, 500, "image/png", false);
+        async function animate() {
+            let list = ["run", "run", "backflip", "run", "wave", "idle", "sleepy"];
+            // let list = ["idle", "sleepy"];
 
-    //     const element = document.createElement("img");
-    //     element.src = image;
-    //     document.body.appendChild(element);
-    // }, 1000);
+            for (let i = 0; i < list.length; i++) {
+                await scene.player.player.animate(animations[list[i]]);
+            }
+            animate();
+        }
+        setTimeout(animate, 500);
+    });
 })();

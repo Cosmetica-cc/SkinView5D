@@ -1,3 +1,5 @@
+import * as THREE from "three";
+
 function createGrouplessBox(xD, yD, zD, material, pX = 0, pY = 0, pZ = 0) {
     const geometry = new THREE.BoxGeometry(xD, yD, zD);
     const box = new THREE.Mesh(geometry, material);
@@ -84,7 +86,6 @@ async function importJsonModel(model, texture) {
             let mesh = new THREE.Mesh(box, material);
 
             if (element.rotation != undefined && element.rotation.angle % 360 != 0) {
-                console.log(element.rotation);
                 let angle = element.rotation.angle * Math.PI / 180;
                 let axis = new THREE.Vector3(0, 0, 0);
 
@@ -98,14 +99,15 @@ async function importJsonModel(model, texture) {
                     }
                     return true;
                 });
-                console.log(axis, angle);
-                mesh.position.sub(...element.rotation.origin);
+                mesh.position.sub(new THREE.Vector3(...element.rotation.origin));
                 mesh.position.applyAxisAngle(axis, angle);
-                mesh.position.add(...element.rotation.origin);
+                mesh.position.add(new THREE.Vector3(...element.rotation.origin));
                 mesh.rotateOnAxis(axis, angle);
             }
             group.add(mesh);
         });
+        group.scale.x = -1;
+        group.scale.z = -1;
         return group;
     } catch (e) {
         console.log(e);
@@ -146,6 +148,7 @@ function createTexture(source) {
     return new Promise((resolve, reject) => {
         try {
             const image = new Image();
+            image.crossOrigin = "anonymous";
             image.onload = () => {
                 let imageCanvas = document.createElement("canvas");
                 imageCanvas.width = image.width;
@@ -160,7 +163,7 @@ function createTexture(source) {
             }
             image.onerror = e => {
                 console.log(e);
-                reject("The requested file does not exist!", source);
+                reject("The requested file does not exist! " + source);
             }
             image.src = source;
         } catch (e) {
@@ -170,6 +173,7 @@ function createTexture(source) {
 }
 
 async function createMaterial(source, opaque = false) {
+    if (source.isMaterial) return source;
     return new THREE.MeshStandardMaterial({
         map: await createTexture(source),
         side: THREE.DoubleSide,
@@ -179,7 +183,7 @@ async function createMaterial(source, opaque = false) {
 }
 
 function lerp(start, end, duration, callback) {
-    if (start == end) return;
+    if (start == end) return callback(end, true);
     const max = Math.max(start, end);
     const min = Math.min(start, end);
     const delta = end - start;
@@ -187,7 +191,7 @@ function lerp(start, end, duration, callback) {
     function animate() {
         let value = Math.min(max, Math.max(min, start + delta * (new Date().getTime() - startTime) / duration / 1000));
         if (value != end) requestAnimationFrame(animate);
-        callback(value);
+        callback(value, value == end);
     }
     animate();
 }

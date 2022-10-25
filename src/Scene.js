@@ -1,12 +1,20 @@
+import * as THREE from "three";
+import {OrbitControls} from "https://unpkg.com/three@0.143.0/examples/jsm/controls/OrbitControls.js";
+import {EffectComposer} from "https://unpkg.com/three@0.143.0/examples/jsm/postprocessing/EffectComposer.js";
+import {FullScreenQuad} from "https://unpkg.com/three@0.143.0/examples/jsm/postprocessing/Pass.js";
+import {RenderPass} from "https://unpkg.com/three@0.143.0/examples/jsm/postprocessing/RenderPass.js";
+import {ShaderPass} from "https://unpkg.com/three@0.143.0/examples/jsm/postprocessing/ShaderPass.js";
+import {FXAAShader} from "https://unpkg.com/three@0.143.0/examples/jsm/shaders/FXAAShader.js";
 import * as ModelUtils from "./ModelUtils.js";
 
-function createRenderer(height, width, antialias) {
+function createRenderer(width, height, antialias, alpha) {
     // three.js expects a canvas, this fakes it lmfao
     const canvas = document.createElement("canvas");
 
     const renderer = new THREE.WebGLRenderer({
         canvas,
         antialias: antialias,
+        alpha: alpha,
         powerPreference: "high-performance"
     });
 
@@ -24,11 +32,9 @@ function createRenderer(height, width, antialias) {
     return renderer;
 }
 
-function drawScene(scene, camera, width, height, imageType, antialias) {
-    const renderer = createRenderer(width, height, antialias);
-    console.log("created renderer");
+function drawScene(scene, camera, width, height, imageType, antialias, alpha) {
+    const renderer = createRenderer(width, height, antialias, alpha);
     renderer.render(scene, camera);
-    console.log("rendered scene");
     const frameBufferPixels = new Uint8Array(width * height * 4);
     const context = renderer.getContext();
     context.readPixels(0, 0, width, height, context.RGBA, context.UNSIGNED_BYTE, frameBufferPixels);
@@ -50,7 +56,6 @@ function drawScene(scene, camera, width, height, imageType, antialias) {
 
 class Scene {
     async setPanorama(source, fixed = false) {
-        console.log("setting panorama");
         if (this.panoTexture) this.panoTexture.dispose();
         this.panoTexture = await ModelUtils.createTexture(source);
         if (!fixed) this.panoTexture.mapping = THREE.EquirectangularReflectionMapping;
@@ -69,33 +74,62 @@ class Scene {
         this.renderer.setRenderTarget(renderTarget);
     }
 
+    updateComposerSize() {
+        this.composer.setSize(this.width, this.height);
+        const pixelRatio = this.renderer.getPixelRatio();
+        this.composer.setPixelRatio(pixelRatio);
+        this.fxaaPass.material.uniforms["resolution"].value.x = 1 / (this.width * pixelRatio);
+        this.fxaaPass.material.uniforms["resolution"].value.y = 1 / (this.height * pixelRatio);
+    }
+
     constructor(options) {
         this.scene = new THREE.Scene();
         this.camera = new THREE.PerspectiveCamera(options.fov || 75, 1, 0.1, 1000);
         this.scene.add(this.camera);
 
+        
+
         let awaitingComponents = [];
-        function checkCompletion(id) {
+        function checkCompletion(instance, id) {
             let index = awaitingComponents.indexOf(id);
             if (index >= 0) awaitingComponents.splice(index, 1);
-            if (!awaitingComponents.length && options.readyCallback) options.readyCallback();
+            if (!awaitingComponents.length && options.readyCallback) options.readyCallback(instance);
         }
 
         if (options.panorama) {
             awaitingComponents.push("panorama");
-            this.setPanorama(options.panorama, options.fixedPanorama).then(()=> checkCompletion("panorama"));
+            this.setPanorama(options.panorama, options.fixedPanorama).then(()=> checkCompletion(this, "panorama"));
         }
         if (options.canvas) {
-            console.log("client requested for this to be live!");
-
             this.renderer = new THREE.WebGLRenderer({
                 canvas: options.canvas,
-                powerPreference: "high-performance"
+                alpha: options.alpha || false,
+                powerPreference: "high-performance",
+                antialias: true
             });
-            this.renderer.setSize( options.canvas.width, options.canvas.height);
+            this.composer = new EffectComposer(this.renderer);
+            this.renderPass = new RenderPass(this.scene, this.camera);
+            this.fxaaPass = new ShaderPass(FXAAShader);
+            this.composer.addPass(this.renderPass);
+            this.composer.addPass(this.fxaaPass);
+            this.updateComposerSize();
+
+            const downsampleFactor = options.downsample || 1;
+
+            function updateSize(instance) {
+                options.canvas.width = options.canvas.offsetWidth * downsampleFactor;
+                options.canvas.height = options.canvas.offsetHeight * downsampleFactor;
+                instance.renderer.setSize(options.canvas.offsetWidth * downsampleFactor, options.canvas.offsetHeight * downsampleFactor, false);
+                instance.camera.aspect = options.canvas.offsetWidth / options.canvas.offsetHeight;
+                instance.camera.updateProjectionMatrix();
+            }
+            updateSize(this);
+            window.addEventListener("resize", () => updateSize(this));
+
+
             this.renderer.shadowMap.enabled = true;
             this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-            // this.controls = new THREE.OrbitControls(this.camera, options.canvas);
+            this.controls = new OrbitControls(this.camera, options.canvas);
             function animate(obj, renderCallback) {
                 requestAnimationFrame(() => animate(obj, renderCallback));
                 if (renderCallback) renderCallback(obj);
@@ -103,7 +137,7 @@ class Scene {
             }
             animate(this, options.renderCallback);
         }
-        if (!awaitingComponents.length) checkCompletion();
+        if (!awaitingComponents.length) checkCompletion(this);
     }
 
     
