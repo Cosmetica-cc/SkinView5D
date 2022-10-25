@@ -89,15 +89,15 @@ class Scene {
         
 
         let awaitingComponents = [];
-        function checkCompletion(id) {
+        function checkCompletion(instance, id) {
             let index = awaitingComponents.indexOf(id);
             if (index >= 0) awaitingComponents.splice(index, 1);
-            if (!awaitingComponents.length && options.readyCallback) options.readyCallback(this);
+            if (!awaitingComponents.length && options.readyCallback) options.readyCallback(instance);
         }
 
         if (options.panorama) {
             awaitingComponents.push("panorama");
-            this.setPanorama(options.panorama, options.fixedPanorama).then(()=> checkCompletion("panorama"));
+            this.setPanorama(options.panorama, options.fixedPanorama).then(()=> checkCompletion(this, "panorama"));
         }
         if (options.canvas) {
             this.renderer = new THREE.WebGLRenderer({
@@ -135,7 +135,7 @@ class Scene {
             }
             animate(this, options.renderCallback);
         }
-        if (!awaitingComponents.length) checkCompletion();
+        if (!awaitingComponents.length) checkCompletion(this);
     }
 
     
