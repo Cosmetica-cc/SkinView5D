@@ -33,6 +33,7 @@ class Player {
     }
 
     setBackEquipment(type) {
+        this.backEquipment = type == "elytra" ? "elytra" : "cape";
         if (this.capeMaterial == this.initialCapeMaterial || type == "none") {
             this.cape.group.visible = false;
             this.elytra.visible = false;
