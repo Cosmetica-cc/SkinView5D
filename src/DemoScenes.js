@@ -2,9 +2,13 @@ import * as THREE from "three";
 import * as Scene from "./Scene.js";
 import {CosmeticaPlayer} from "./Models/CosmeticaPlayer.js";
 
-function createScene(sceneType, options = {}) {
-    if (!Object.keys(scenes).includes(sceneType)) throw "Scene does not exist!";
-    const sceneInfo = scenes[sceneType];
+async function createScene(sceneType, options = {}) {
+    var sceneInfo = sceneType;
+    // if (typeof sceneType == "string") {
+    //     if (!scenes.length) scenes = await getFile("../demoScenes.json", true);
+    //     if (!Object.keys(scenes).includes(sceneType)) throw "Scene does not exist!";
+    //     scenes[sceneType];
+    // }
     return new Promise((resolve, reject) => {
         let parts = {player: 1, scene: 1};
         const scene = new Scene.Scene({

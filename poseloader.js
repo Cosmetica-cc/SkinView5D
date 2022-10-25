@@ -96,3 +96,17 @@ const scenes = {
         "fixedPano": false
     }
 };
+
+function getScene(id) {
+    if (!Object.keys(scenes).includes(id)) throw "Unknown scene: " + id;
+    var out = scenes[id];
+    if (!Object.keys(poses).includes(out.pose)) throw "Unknown pose: " + out.pose;
+    out.pose = poses[out.pose];
+    return out;
+}
+
+export {
+    poses,
+    scenes,
+    getScene
+}
