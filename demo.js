@@ -1,6 +1,7 @@
 // import * as DemoScenes from "https://cdn.jsdelivr.net/gh/eyezahhhh/SkinView5D/src/DemoScenes.js";
-import * as DemoScenes from "./src/DemoScenes.js";
+import * as DemoScenes from "skinview5d";
 import * as DemoPoses from "./poseloader.js";
+import Animations from "./animations.js";
 
 (async () => {
     const canvas = document.createElement("canvas");
@@ -25,7 +26,7 @@ import * as DemoPoses from "./poseloader.js";
             // let list = ["idle", "sleepy"];
 
             for (let i = 0; i < list.length; i++) {
-                await scene.player.player.animate(animations[list[i]]);
+                await scene.player.player.animate(Animations[list[i]]);
             }
             animate();
         }
