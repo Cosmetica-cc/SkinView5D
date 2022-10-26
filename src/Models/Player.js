@@ -4,6 +4,7 @@ import * as ModelUtils from "../ModelUtils.js";
 class Player {
     constructor() {
         this.bodyPartNames = ["body", "head", "armLeft", "armRight", "legLeft", "legRight"];
+        this.outerBodyPartNames = ["jacket", "hat", "sleeveLeft", "sleeveRight", "pantsLeft", "pantsRight"];
         this.groupOffsets = {
             body: () => [0, 0, 0],
             head: () => [0, 6, 0],
@@ -52,6 +53,7 @@ class Player {
         source = await ModelUtils.createMaterial(source);
         this.skinTexture = source;
         this.bodyPartNames.forEach(part => this[part].box.material = source);
+        this.outerBodyPartNames.forEach(part => this[part].material = source);
     }
 
     async build(skinTexture, options = {}) {
