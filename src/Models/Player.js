@@ -48,6 +48,12 @@ class Player {
         }
     }
 
+    async setSkin(source) {
+        source = await ModelUtils.createMaterial(source);
+        this.skinTexture = source;
+        this.bodyPartNames.forEach(part => this[part].box.material = source);
+    }
+
     async build(skinTexture, options = {}) {
         if (options.slim != undefined) this.slim = !!options.slim;
         const armWidth = 4 - this.slim;
