@@ -502,7 +502,6 @@ const animations = {
         {
             time: 0,
             cape: {
-                type: "cape",
                 rotation: 1,
                 duration: 0.5
             }
@@ -590,7 +589,6 @@ const animations = {
         {
             time: 0,
             cape: {
-                type: "elytra",
                 spread: 1,
                 duration: 0.5
             },

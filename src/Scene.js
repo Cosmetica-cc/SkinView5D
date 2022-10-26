@@ -1,10 +1,5 @@
-import * as THREE from "three";
-import {OrbitControls} from "https://unpkg.com/three@0.143.0/examples/jsm/controls/OrbitControls.js";
-import {EffectComposer} from "https://unpkg.com/three@0.143.0/examples/jsm/postprocessing/EffectComposer.js";
-import {FullScreenQuad} from "https://unpkg.com/three@0.143.0/examples/jsm/postprocessing/Pass.js";
-import {RenderPass} from "https://unpkg.com/three@0.143.0/examples/jsm/postprocessing/RenderPass.js";
-import {ShaderPass} from "https://unpkg.com/three@0.143.0/examples/jsm/postprocessing/ShaderPass.js";
-import {FXAAShader} from "https://unpkg.com/three@0.143.0/examples/jsm/shaders/FXAAShader.js";
+import * as THREE from "https://unpkg.com/three@0.143.0/build/three.module.js";
+import {OrbitControls} from "./OrbitControls.three.js";
 import * as ModelUtils from "./ModelUtils.js";
 
 function createRenderer(width, height, antialias, alpha) {
@@ -107,12 +102,6 @@ class Scene {
                 powerPreference: "high-performance",
                 antialias: true
             });
-            this.composer = new EffectComposer(this.renderer);
-            this.renderPass = new RenderPass(this.scene, this.camera);
-            this.fxaaPass = new ShaderPass(FXAAShader);
-            this.composer.addPass(this.renderPass);
-            this.composer.addPass(this.fxaaPass);
-            this.updateComposerSize();
 
             const downsampleFactor = options.downsample || 1;
 

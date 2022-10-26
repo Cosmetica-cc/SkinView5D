@@ -1,4 +1,4 @@
-import * as THREE from "three";
+import * as THREE from "https://unpkg.com/three@0.143.0/build/three.module.js";
 import * as ModelUtils from "../ModelUtils.js";
 
 class Player {
@@ -18,10 +18,10 @@ class Player {
     }
 
     updateElytraSpread(angle) {
-        //this.elytraWingLeft.group.rotation.x = angle;
+        this.elytraWingLeft.group.rotation.x = angle;
         this.elytraWingLeft.group.rotation.z = angle;
         
-        //this.elytraWingRight.group.rotation.x = angle;
+        this.elytraWingRight.group.rotation.x = angle;
         this.elytraWingRight.group.rotation.z = -angle;
     }
 

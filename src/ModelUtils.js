@@ -1,4 +1,4 @@
-import * as THREE from "three";
+import * as THREE from "https://unpkg.com/three@0.143.0/build/three.module.js";
 
 function createGrouplessBox(xD, yD, zD, material, pX = 0, pY = 0, pZ = 0) {
     const geometry = new THREE.BoxGeometry(xD, yD, zD);

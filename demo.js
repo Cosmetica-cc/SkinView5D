@@ -1,5 +1,4 @@
-// import * as DemoScenes from "https://cdn.jsdelivr.net/gh/eyezahhhh/SkinView5D/src/DemoScenes.js";
-import * as DemoScenes from "skinview5d";
+import * as DemoScenes from "./src/DemoScenes.js";
 import * as DemoPoses from "./poseloader.js";
 import { animations } from "./animations.js";
 

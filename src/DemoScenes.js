@@ -1,14 +1,9 @@
-import * as THREE from "three";
+import * as THREE from "https://unpkg.com/three@0.143.0/build/three.module.js";
 import * as Scene from "./Scene.js";
 import {CosmeticaPlayer} from "./Models/CosmeticaPlayer.js";
 
 async function createScene(sceneType, options = {}) {
     var sceneInfo = sceneType;
-    // if (typeof sceneType == "string") {
-    //     if (!scenes.length) scenes = await getFile("../demoScenes.json", true);
-    //     if (!Object.keys(scenes).includes(sceneType)) throw "Scene does not exist!";
-    //     scenes[sceneType];
-    // }
     return new Promise((resolve, reject) => {
         let parts = {player: 1, scene: 1};
         const scene = new Scene.Scene({
