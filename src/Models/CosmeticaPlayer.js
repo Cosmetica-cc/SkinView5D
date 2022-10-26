@@ -87,7 +87,7 @@ class CosmeticaPlayer {
             }
             if (options.backBling && options.backBling.model && options.backBling.texture && (!options.cape || !!(options.backBling.extraInfo & 2))) {
                 awaitingComponents.push("backbling");
-                createCosmetic("backbling", options.backBling, this.player).then(() => checkCompletion("backbling"));
+                createCosmetic("backBling", options.backBling, this.player).then(() => checkCompletion("backbling"));
             }
 
             if (options.cape) {
