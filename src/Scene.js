@@ -39,7 +39,7 @@ function drawScene(scene, camera, width, height, imageType, antialias, alpha) {
         const effectFXAA = new ShaderPass(FXAAShader);
         composer.addPass(renderPass);
         composer.addPass(effectFXAA);
-        const pixelRatio = instance.renderer.getPixelRatio();
+        const pixelRatio = renderer.getPixelRatio();
         effectFXAA.material.uniforms.resolution.value.set(1 / width / pixelRatio, 1 / height / pixelRatio);
         effectFXAA.renderToScreen = true;
         renderer.render(scene, camera);
