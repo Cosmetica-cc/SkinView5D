@@ -1,5 +1,9 @@
 import * as THREE from "https://unpkg.com/three@0.143.0/build/three.module.js";
-import {OrbitControls} from "./OrbitControls.three.js";
+import {OrbitControls} from "./three/OrbitControls.js";
+import { EffectComposer } from "./three/EffectComposer.js";
+import { RenderPass } from "./three/RenderPass.js";
+import { ShaderPass } from "./three/ShaderPass.js";
+import { FXAAShader } from "./three/FXAAShader.js";
 import * as ModelUtils from "./ModelUtils.js";
 
 function createRenderer(width, height, antialias, alpha) {
@@ -8,7 +12,6 @@ function createRenderer(width, height, antialias, alpha) {
 
     const renderer = new THREE.WebGLRenderer({
         canvas,
-        antialias: antialias,
         alpha: alpha,
         powerPreference: "high-performance"
     });
@@ -29,7 +32,21 @@ function createRenderer(width, height, antialias, alpha) {
 
 function drawScene(scene, camera, width, height, imageType, antialias, alpha) {
     const renderer = createRenderer(width, height, antialias, alpha);
-    renderer.render(scene, camera);
+    if (antialias) {
+        const composer = new EffectComposer(renderer);
+        composer.setSize(width, height);
+        const renderPass = new RenderPass(this.scene, this.camera);
+        const effectFXAA = new ShaderPass(FXAAShader);
+        composer.addPass(renderPass);
+        composer.addPass(effectFXAA);
+        const pixelRatio = instance.renderer.getPixelRatio();
+        effectFXAA.material.uniforms.resolution.value.set(1 / width / pixelRatio, 1 / height / pixelRatio);
+        effectFXAA.renderToScreen = true;
+        renderer.render(scene, camera);
+        composer.render();
+    } else {
+        renderer.render(scene, camera);
+    }
     const frameBufferPixels = new Uint8Array(width * height * 4);
     const context = renderer.getContext();
     context.readPixels(0, 0, width, height, context.RGBA, context.UNSIGNED_BYTE, frameBufferPixels);
@@ -78,6 +95,7 @@ class Scene {
     }
 
     constructor(options) {
+        options.antialias = true;
         this.scene = new THREE.Scene();
         this.camera = new THREE.PerspectiveCamera(options.fov || 75, 1, 0.1, 1000);
         this.scene.add(this.camera);
@@ -99,9 +117,17 @@ class Scene {
             this.renderer = new THREE.WebGLRenderer({
                 canvas: options.canvas,
                 alpha: options.alpha || false,
-                powerPreference: "high-performance",
-                antialias: true
+                powerPreference: "high-performance"
             });
+
+            this.effectFXAA = null;
+            if (options.antialias) {
+                this.composer = new EffectComposer(this.renderer);
+                this.renderPass = new RenderPass(this.scene, this.camera);
+                this.effectFXAA = new ShaderPass(FXAAShader);
+                this.composer.addPass(this.renderPass);
+                this.composer.addPass(this.effectFXAA);
+            }
 
             const downsampleFactor = options.downsample || 1;
 
@@ -109,10 +135,16 @@ class Scene {
                 options.canvas.width = options.canvas.offsetWidth * downsampleFactor;
                 options.canvas.height = options.canvas.offsetHeight * downsampleFactor;
                 instance.renderer.setSize(options.canvas.offsetWidth * downsampleFactor, options.canvas.offsetHeight * downsampleFactor, false);
+                instance.composer.setSize(options.canvas.offsetWidth, options.canvas.offsetHeight);
+                if (instance.effectFXAA) {
+                    let pixelRatio = instance.renderer.getPixelRatio();
+                    instance.effectFXAA.material.uniforms.resolution.value.set(1 / options.canvas.offsetWidth / pixelRatio, 1 / options.canvas.offsetHeight / pixelRatio);
+                }
                 instance.camera.aspect = options.canvas.offsetWidth / options.canvas.offsetHeight;
                 instance.camera.updateProjectionMatrix();
             }
             updateSize(this);
+            if (this.effectFXAA) this.effectFXAA.renderToScreen = true;
             window.addEventListener("resize", () => updateSize(this));
 
 
@@ -123,6 +155,7 @@ class Scene {
                 requestAnimationFrame(() => animate(obj, renderCallback));
                 if (renderCallback) renderCallback(obj);
                 obj.renderer.render(obj.scene, obj.camera);
+                if (obj.composer) obj.composer.render();
             }
             animate(this, options.renderCallback);
         }
