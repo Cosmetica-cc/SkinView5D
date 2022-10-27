@@ -9,8 +9,13 @@ function createCosmetic(type, data, player) {
             model.scale.add(new THREE.Vector3(0.01, 0.01, 0.01));
             switch (type) {
                 case "hat":
-                    model.position.sub(new THREE.Vector3(-8, -8, -8));
-                    player.head.group.add(model);
+                    if (data.extraInfo & 2) {
+                        model.position.sub(new THREE.Vector3(-8, -14, -8));
+                        player.body.group.add(model);
+                    } else {
+                        model.position.sub(new THREE.Vector3(-8, -8, -8));
+                        player.head.group.add(model);
+                    }
                     resolve(model);
                     break;
                 case "shoulderBuddyLeft":
