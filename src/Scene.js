@@ -67,6 +67,17 @@ function drawScene(scene, camera, width, height, imageType, antialias, alpha) {
 }
 
 class Scene {
+    dispose() {
+        ModelUtils.removeObjectsWithChildren(this.scene);
+        Object.keys(this).forEach(item => {
+            item = this[item];
+            try {
+                item.remove();
+            } catch {}
+        })
+        this.scene.remove();
+    }
+
     async setPanorama(source, fixed = false) {
         if (this.panoTexture) this.panoTexture.dispose();
         this.panoTexture = await ModelUtils.createTexture(source);
@@ -76,7 +87,7 @@ class Scene {
     }
 
     attachCanvas(canvas) {
-        const renderTarget = new THREE.WebGLRenderTarget(canvas.width, canvas.height, {
+        this.renderTarget = new THREE.WebGLRenderTarget(canvas.width, canvas.height, {
             minFilter: THREE.LinearFilter,
             magFilter: THREE.NearestFilter,
             format: THREE.RGBAFormat,

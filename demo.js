@@ -31,5 +31,9 @@ import { animations } from "./animations.js";
             animate();
         }
         setTimeout(animate, 500);
+        // setTimeout(() => {
+        //     console.log("disposing!");
+        //     scene.dispose();
+        // }, 5000);
     });
 })();
