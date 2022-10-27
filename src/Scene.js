@@ -35,7 +35,7 @@ function drawScene(scene, camera, width, height, imageType, antialias, alpha) {
     if (antialias) {
         const composer = new EffectComposer(renderer);
         composer.setSize(width, height);
-        const renderPass = new RenderPass(this.scene, this.camera);
+        const renderPass = new RenderPass(scene, camera);
         const effectFXAA = new ShaderPass(FXAAShader);
         composer.addPass(renderPass);
         composer.addPass(effectFXAA);

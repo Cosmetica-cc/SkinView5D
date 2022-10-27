@@ -95,6 +95,8 @@ class CosmeticaPlayer {
                 createCosmetic("backBling", options.backBling, this.player).then(() => checkCompletion("backbling"));
             }
 
+            this.capeSpeed = null;
+
             if (options.cape) {
                 awaitingComponents.push("cape");
                 let img = new Image();
@@ -120,16 +122,17 @@ class CosmeticaPlayer {
                             if (!options.cape.extraInfo || frameCount.length == 1) {
                             } else {
                                 let i = 0;
-                                let loop = setInterval(() => {
-                                    if (!frames.includes(this.player.capeMaterial)) {
-                                        clearInterval(loop);
+                                function loop(instance) {
+                                    if (!frames.includes(instance.player.capeMaterial)) {
                                         console.log("Cape has been changed! stopping the animation...");
                                         return;
                                     }
                                     i++;
                                     while (i >= frameCount) i -= frameCount;
-                                    this.player.setCape(frames[i]);
-                                }, options.cape.extraInfo);
+                                    instance.player.setCape(frames[i]);
+                                    setTimeout(() => loop(instance), instance.capeSpeed || options.cape.extraInfo);
+                                }
+                                setTimeout(() => loop(this), this.capeSpeed || options.cape.extraInfo);
                             }
                         });
                     }
