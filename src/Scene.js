@@ -13,7 +13,8 @@ function createRenderer(width, height, antialias, alpha) {
     const renderer = new THREE.WebGLRenderer({
         canvas,
         alpha: alpha,
-        powerPreference: "high-performance"
+        powerPreference: "high-performance",
+        antialias
     });
 
     renderer.shadowMap.enabled = true;
@@ -128,7 +129,8 @@ class Scene {
             this.renderer = new THREE.WebGLRenderer({
                 canvas: options.canvas,
                 alpha: options.alpha || false,
-                powerPreference: "high-performance"
+                powerPreference: "high-performance",
+                antialias: !!options.antialias
             });
 
             this.effectFXAA = null;

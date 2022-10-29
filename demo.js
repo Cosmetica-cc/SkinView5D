@@ -18,7 +18,7 @@ import { animations } from "./animations.js";
             // panorama: `https://cosmetica.cc/page/panoramas/${response.panorama}.jpg`,
             renderCallback: (scene) => {
                 if (!scene.player) return;
-                // scene.player.player.root.rotateY(0.001);
+                scene.player.player.root.rotateY(0.001);
             }
         });
         async function animate() {

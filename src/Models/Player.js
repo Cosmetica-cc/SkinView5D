@@ -74,6 +74,7 @@ class Player {
         ModelUtils.setUVs(this.hat.geometry, 32, 0, 8, 8, 8, 64, 64);
         this.head.group.add(this.hat);
         this.body.group.add(this.head.group);
+        this.head.group.rotateX(1);
 
         this.armLeft = ModelUtils.createBox(armWidth, 12, 4, this.skinTexture, ...this.groupOffsets.armLeft(), 1, -4, 0);
         ModelUtils.setUVs(this.armLeft.box.geometry, 32, 48, armWidth, 12, 4, 64, 64);
@@ -106,7 +107,7 @@ class Player {
         this.initialCapeMaterial = new THREE.MeshBasicMaterial( { color: 0xffff00 } );
         this.capeMaterial = options.capeTexture ? ModelUtils.createMaterial(options.capeTexture) : this.initialCapeMaterial;
 
-        this.cape = ModelUtils.createBox(10, 16, 1, this.capeMaterial, 0, 6, -3, 0, -8, 1);
+        this.cape = ModelUtils.createBox(10, 16, 1, this.capeMaterial, 0, 6, -2, 0, -8, -0.5);
         ModelUtils.setUVs(this.cape.box.geometry, 0, 0, 10, 16, 1, 64, 32);
         this.cape.box.scale.z = -1;
         this.cape.box.scale.x = -1;

@@ -172,13 +172,13 @@ function createTexture(source) {
     });
 }
 
-async function createMaterial(source, opaque = false) {
+async function createMaterial(source, opaque = false, alphaTest = 0.35) {
     if (source.isMaterial) return source;
     return new THREE.MeshStandardMaterial({
         map: await createTexture(source),
         side: THREE.DoubleSide,
         transparent: !opaque,
-        alphaTest: 1e-5
+        alphaTest
     });
 }
 
