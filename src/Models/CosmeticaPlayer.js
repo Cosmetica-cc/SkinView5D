@@ -24,7 +24,7 @@ function createCosmetic(type, data, player) {
                         model.position.sub(new THREE.Vector3(-14, -5.5, -8));
                     } else {
                         player.armLeft.group.add(model);
-                        model.position.sub(new THREE.Vector3(-8, -2, -8));
+                        model.position.sub(new THREE.Vector3(-8 - 0.5 * player.slim, -2, -8));
                     }
                     resolve(model);
                     break;
@@ -36,7 +36,7 @@ function createCosmetic(type, data, player) {
                         model.position.sub(new THREE.Vector3(inverse ? 14 : -2, -5.5, -8));
                     } else {
                         player.armRight.group.add(model);
-                        model.position.sub(new THREE.Vector3(inverse ? 8 : -8, -2, -8));
+                        model.position.sub(new THREE.Vector3((inverse ? 1 : -1) * (8 + 0.5 * player.slim), -2, -8));
                     }
                     resolve(model);
                     break;

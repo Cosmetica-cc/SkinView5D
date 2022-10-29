@@ -50,16 +50,20 @@ class Player {
     }
 
     async setSkin(source) {
-        source = await ModelUtils.createMaterial(source);
+        source = await ModelUtils.createMaterial(source || "./skin.png", undefined, undefined, true);
         this.skinTexture = source;
-        this.bodyPartNames.forEach(part => this[part].box.material = source);
-        this.outerBodyPartNames.forEach(part => this[part].material = source);
+        this.bodyPartNames.forEach(part => {
+            if (this[part]) this[part].box.material = source;
+        });
+        this.outerBodyPartNames.forEach(part => {
+            if (this[part]) this[part].material = source;
+        });
     }
 
     async build(skinTexture, options = {}) {
         if (options.slim != undefined) this.slim = !!options.slim;
         const armWidth = 4 - this.slim;
-        this.skinTexture = await ModelUtils.createMaterial(skinTexture || "./skin.png");
+        await this.setSkin(skinTexture);
 
         this.body = ModelUtils.createBox(8, 12, 4, this.skinTexture, ...this.groupOffsets.body());
         ModelUtils.setUVs(this.body.box.geometry, 16, 16, 8, 12, 4, 64, 64);

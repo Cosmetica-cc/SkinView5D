@@ -694,7 +694,7 @@ const animations = {
                 duration: 0.2
             },
             cape: {
-                spread: 0.1,
+                spread: 0,
                 rotation: 0,
                 duration: 0.3
             }

@@ -144,12 +144,35 @@ function setUVs(box, u, v, width, height, depth, textureWidth, textureHeight) {
 	uvAttributes.needsUpdate = true;
 }
 
-function createTexture(source) {
+function convertSkin(image) {
+    return new Promise((resolve, reject) => {
+        const canvas = document.createElement("canvas");
+        canvas.width = 64;
+        canvas.height = 64;
+        const ctx =  canvas.getContext("2d");
+        ctx.drawImage(image, 0, 0, 64, 32);
+        ctx.drawImage(image, 0, 16, 16, 16, 16, 48, 16, 16);
+        ctx.drawImage(image, 40, 16, 16, 16, 32, 48, 16, 16);
+        ctx.clearRect(0, 0, 8, 8);
+        ctx.clearRect(24, 0, 8, 8);
+        ctx.clearRect(32, 0, 32, 16);
+        const out = new Image();
+        out.onload = () => resolve(out);
+        out.onerror = e => {
+            console.log(e);
+            reject();
+        }
+        out.src = canvas.toDataURL();
+    });
+}
+
+function createTexture(source, isSkin) {
     return new Promise((resolve, reject) => {
         try {
-            const image = new Image();
+            let image = new Image();
             image.crossOrigin = "anonymous";
-            image.onload = () => {
+            image.onload = async () => {
+                if (isSkin && image.height * 2 == image.width) image = await convertSkin(image);
                 let imageCanvas = document.createElement("canvas");
                 imageCanvas.width = image.width;
                 imageCanvas.height = image.height;
@@ -172,10 +195,10 @@ function createTexture(source) {
     });
 }
 
-async function createMaterial(source, opaque = false, alphaTest = 0.35) {
+async function createMaterial(source, opaque = false, alphaTest = 0.35, isSkin = false) {
     if (source.isMaterial) return source;
     return new THREE.MeshStandardMaterial({
-        map: await createTexture(source),
+        map: await createTexture(source, isSkin),
         side: THREE.DoubleSide,
         transparent: !opaque,
         alphaTest
