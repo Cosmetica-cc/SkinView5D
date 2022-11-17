@@ -18,8 +18,7 @@
   ],
   "dependencies": {
     "canvas": "^2.10.2",
-    "gl": "^6.0.1",
-    "three": "^0.143.0"
+    "gl": "^6.0.1"
   },
   "scripts": {
     "demo": "node demo.js"
