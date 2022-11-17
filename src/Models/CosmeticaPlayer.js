@@ -1,6 +1,8 @@
-import * as THREE from "https://unpkg.com/three@0.143.0/build/three.module.js";
+import * as THREE from "../Three.module.js";
 import {Player} from "./Player.js";
 import * as ModelUtils from "../ModelUtils.js";
+
+import Canvas from "canvas";
 
 function createCosmetic(type, data, player) {
     return new Promise((resolve, reject) => {
@@ -99,43 +101,20 @@ class CosmeticaPlayer {
 
             if (options.cape) {
                 awaitingComponents.push("cape");
-                let img = new Image();
+                let img = new Canvas.Image();
                 img.onload = () => {
                     let width = img.width;
                     let height = img.height;
                     let frameHeight = width / 2;
                     if (height % frameHeight != 0) return console.log("Cape wasn't right dimensions!");
-                    let frameCount = height / frameHeight;
-                    let frames = [];
-                    let capeCanvas = document.createElement("canvas");
-                    capeCanvas.width = width;
-                    capeCanvas.height = frameHeight;
+                    let capeCanvas = Canvas.createCanvas(width, frameHeight);
                     let ctx = capeCanvas.getContext("2d");
-                    for (let i = 0; i < frameCount; i++) {
-                        ctx.clearRect(0, 0, width, frameHeight);
-                        ctx.drawImage(img, 0, frameHeight * i, width, frameHeight, 0, 0, width, frameHeight);
-                        ModelUtils.createMaterial(capeCanvas.toDataURL()).then(material => {
-                            frames.push(material);
-                            if (frames.length != frameCount) return;
-                            this.player.setCape(frames[0]);
-                            checkCompletion("cape");
-                            if (!options.cape.extraInfo || frameCount.length == 1) {
-                            } else {
-                                let i = 0;
-                                function loop(instance) {
-                                    if (!frames.includes(instance.player.capeMaterial)) {
-                                        console.log("Cape has been changed! stopping the animation...");
-                                        return;
-                                    }
-                                    i++;
-                                    while (i >= frameCount) i -= frameCount;
-                                    instance.player.setCape(frames[i]);
-                                    setTimeout(() => loop(instance), instance.capeSpeed || options.cape.extraInfo);
-                                }
-                                setTimeout(() => loop(this), this.capeSpeed || options.cape.extraInfo);
-                            }
-                        });
-                    }
+                    ctx.clearRect(0, 0, width, frameHeight);
+                    ctx.drawImage(img, 0, 0, width, frameHeight, 0, 0, width, frameHeight);
+                    ModelUtils.createMaterial(capeCanvas.toDataURL()).then(material => {
+                        this.player.setCape(material);
+                        checkCompletion("cape");
+                    });
                 }
                 img.src = options.cape.image;
             }

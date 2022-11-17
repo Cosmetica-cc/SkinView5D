@@ -1,0 +1,29 @@
+{
+  "name": "skinview5d",
+  "version": "0.1.0",
+  "description": "Cool Minecraft model viewer",
+  "main": "./SkinView5D.js",
+  "module": "./SkinView5D.js",
+  "exports": {
+    ".": {
+      "import": "./SkinView5D.js"
+    }
+  },
+  "type": "module",
+  "files": [
+    "SkinView5D.js",
+    "src",
+    "poseloader.js",
+    "LICENSE"
+  ],
+  "dependencies": {
+    "canvas": "^2.10.2",
+    "gl": "^6.0.1",
+    "three": "^0.143.0"
+  },
+  "scripts": {
+    "demo": "node demo.js"
+  },
+  "author": "eyezah",
+  "license": "Apache"
+}

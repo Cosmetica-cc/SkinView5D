@@ -1,4 +1,6 @@
-import * as THREE from "https://unpkg.com/three@0.143.0/build/three.module.js";
+import * as THREE from "./Three.module.js";
+
+import Canvas from "canvas";
 
 function createGrouplessBox(xD, yD, zD, material, pX = 0, pY = 0, pZ = 0) {
     const geometry = new THREE.BoxGeometry(xD, yD, zD);
@@ -146,9 +148,7 @@ function setUVs(box, u, v, width, height, depth, textureWidth, textureHeight) {
 
 function convertSkin(image) {
     return new Promise((resolve, reject) => {
-        const canvas = document.createElement("canvas");
-        canvas.width = 64;
-        canvas.height = 64;
+        const canvas = Canvas.createCanvas(64, 64);
         const ctx =  canvas.getContext("2d");
         ctx.drawImage(image, 0, 0, 64, 32);
         ctx.drawImage(image, 0, 16, 16, 16, 16, 48, 16, 16);
@@ -169,13 +169,11 @@ function convertSkin(image) {
 function createTexture(source, isSkin) {
     return new Promise((resolve, reject) => {
         try {
-            let image = new Image();
+            let image = new Canvas.Image;
             image.crossOrigin = "anonymous";
             image.onload = async () => {
                 if (isSkin && image.height * 2 == image.width) image = await convertSkin(image);
-                let imageCanvas = document.createElement("canvas");
-                imageCanvas.width = image.width;
-                imageCanvas.height = image.height;
+                let imageCanvas = Canvas.createCanvas(image.width, image.height);
                 imageCanvas.getContext("2d").drawImage(image, 0, 0, image.width, image.height);
                 let texture = new THREE.CanvasTexture(imageCanvas);
                 texture.wrapS = THREE.RepeatWrapping;

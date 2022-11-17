@@ -1,39 +1,18 @@
-import * as DemoScenes from "./src/DemoScenes.js";
-import * as DemoPoses from "./poseloader.js";
-import { animations } from "./animations.js";
+import { PoseLoader, createScene, drawScene } from "./SkinView5D.js";
+
+import Axios from "axios";
 
 (async () => {
-    const canvas = document.createElement("canvas");
-    canvas.width = 1000;
-    canvas.height = 1000;
-    document.body.appendChild(canvas);
-    fetch("https://api.cosmetica.cc/v2/get/info?user=" + location.hash.substring(1)).then(r => r.json()).then(async response => {
+    Axios.get("https://api.cosmetica.cc/v2/get/info?user=eye2ah").then(async response => {
+        if (response.status != 200) return console.log("Invalid response from Cosmetica!");
+        response = response.data;
         delete response.panorama;
-        const scene = await DemoScenes.createScene(DemoPoses.getScene("normal"), {
-            canvas,
-            backEquipment: "cape",
-            downsample: 2,
+        const scene = await createScene(PoseLoader.getScene("starjump"), {
             ...response,
-            alpha: true,
-            // panorama: `https://cosmetica.cc/page/panoramas/${response.panorama}.jpg`,
-            renderCallback: (scene) => {
-                if (!scene.player) return;
-                scene.player.player.root.rotateY(0.001);
-            }
+            backEquipment: "cape"
         });
-        async function animate() {
-            let list = ["run", "run", "backflip", "run", "wave", "idle", "sleepy"];
-            // let list = ["idle", "sleepy"];
-
-            for (let i = 0; i < list.length; i++) {
-                await scene.player.player.animate(animations[list[i]]);
-            }
-            animate();
-        }
-        setTimeout(animate, 500);
-        // setTimeout(() => {
-        //     console.log("disposing!");
-        //     scene.dispose();
-        // }, 5000);
+        setTimeout(async () => {
+            console.log(await drawScene(scene.scene, scene.camera, 300, 300, "image/png", false, true, 2));
+        }, 1000);
     });
 })();

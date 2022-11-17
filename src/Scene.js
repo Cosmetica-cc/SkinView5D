@@ -1,20 +1,28 @@
-import * as THREE from "https://unpkg.com/three@0.143.0/build/three.module.js";
-import {OrbitControls} from "./three/OrbitControls.js";
-import { EffectComposer } from "./three/EffectComposer.js";
-import { RenderPass } from "./three/RenderPass.js";
-import { ShaderPass } from "./three/ShaderPass.js";
-import { FXAAShader } from "./three/FXAAShader.js";
+import * as THREE from "./Three.module.js";
 import * as ModelUtils from "./ModelUtils.js";
+
+import GL from "gl";
+import Canvas from "canvas";
 
 function createRenderer(width, height, antialias, alpha) {
     // three.js expects a canvas, this fakes it lmfao
-    const canvas = document.createElement("canvas");
+    const canvas = {
+        width,
+        height,
+        addEventListener: () => {},
+        removeEventListener: () => {}
+    };
+
+    console.log("creating renderer");
 
     const renderer = new THREE.WebGLRenderer({
         canvas,
         alpha: alpha,
         powerPreference: "high-performance",
-        antialias
+        antialias,
+        context: GL(width, height, {
+            preserveDrawingBuffer: true
+        })
     });
 
     renderer.shadowMap.enabled = true;
@@ -31,13 +39,15 @@ function createRenderer(width, height, antialias, alpha) {
     return renderer;
 }
 
-function drawScene(scene, camera, width, height, imageType, antialias, alpha) {
+async function drawScene(scene, camera, width, height, imageType, antialias, alpha, downsample = 1) {
+    width *= downsample;
+    height *= downsample;
     const renderer = createRenderer(width, height, antialias, alpha);
     if (antialias) {
-        const composer = new EffectComposer(renderer);
+        const composer = new THREE.EffectComposer(renderer);
         composer.setSize(width, height);
-        const renderPass = new RenderPass(scene, camera);
-        const effectFXAA = new ShaderPass(FXAAShader);
+        const renderPass = new THREE.RenderPass(scene, camera);
+        const effectFXAA = new THREE.ShaderPass(THREE.FXAAShader);
         composer.addPass(renderPass);
         composer.addPass(effectFXAA);
         const pixelRatio = renderer.getPixelRatio();
@@ -57,14 +67,15 @@ function drawScene(scene, camera, width, height, imageType, antialias, alpha) {
         let imgRow = height - fbRow - 1;
         pixels.set(rowData, imgRow * width * 4);
     }
-    const canvas = document.createElement("canvas");
-    canvas.width = width;
-    canvas.height = height;
+    const canvas = Canvas.createCanvas(width, height);
     const ctx = canvas.getContext('2d');
     const imgData = ctx.createImageData(width, height);
     imgData.data.set(pixels);
     ctx.putImageData(imgData, 0, 0);
-    return canvas.toDataURL(imageType);
+    const outCanvas = Canvas.createCanvas(width / downsample, height / downsample);
+    const outCtx = outCanvas.getContext("2d");
+    outCtx.drawImage(canvas, 0, 0, width, height, 0, 0, width / downsample, height / downsample);
+    return outCanvas.toDataURL(imageType);
 }
 
 class Scene {
@@ -108,9 +119,11 @@ class Scene {
 
     constructor(options) {
         options.antialias = true;
+        console.log("Creating scene...");
         this.scene = new THREE.Scene();
         this.camera = new THREE.PerspectiveCamera(options.fov || 75, 1, 0.1, 1000);
         this.scene.add(this.camera);
+        console.log("created scene");
 
         
 
@@ -135,9 +148,9 @@ class Scene {
 
             this.effectFXAA = null;
             if (options.antialias) {
-                this.composer = new EffectComposer(this.renderer);
-                this.renderPass = new RenderPass(this.scene, this.camera);
-                this.effectFXAA = new ShaderPass(FXAAShader);
+                this.composer = new THREE.EffectComposer(this.renderer);
+                this.renderPass = new THREE.RenderPass(this.scene, this.camera);
+                this.effectFXAA = new THREE.ShaderPass(THREE.FXAAShader);
                 this.composer.addPass(this.renderPass);
                 this.composer.addPass(this.effectFXAA);
             }
@@ -163,14 +176,7 @@ class Scene {
 
             this.renderer.shadowMap.enabled = true;
             this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-            this.controls = new OrbitControls(this.camera, options.canvas);
-            function animate(obj, renderCallback) {
-                requestAnimationFrame(() => animate(obj, renderCallback));
-                if (renderCallback) renderCallback(obj);
-                obj.renderer.render(obj.scene, obj.camera);
-                if (obj.composer) obj.composer.render();
-            }
-            animate(this, options.renderCallback);
+            this.controls = new THREE.OrbitControls(this.camera, options.canvas);
         }
         if (!awaitingComponents.length) checkCompletion(this);
     }

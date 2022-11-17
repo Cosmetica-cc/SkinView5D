@@ -1,4 +1,4 @@
-import * as THREE from "https://unpkg.com/three@0.143.0/build/three.module.js";
+import * as THREE from "./Three.module.js";
 import * as Scene from "./Scene.js";
 import {CosmeticaPlayer} from "./Models/CosmeticaPlayer.js";
 
