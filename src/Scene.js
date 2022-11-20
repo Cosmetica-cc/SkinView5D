@@ -42,6 +42,8 @@ function createRenderer(width, height, antialias, alpha) {
 async function drawScene(scene, camera, width, height, imageType, antialias, alpha, downsample = 1) {
     width *= downsample;
     height *= downsample;
+    camera.aspect = width / height;
+    camera.updateProjectionMatrix();
     const renderer = createRenderer(width, height, antialias, alpha);
     if (antialias) {
         const composer = new THREE.EffectComposer(renderer);
