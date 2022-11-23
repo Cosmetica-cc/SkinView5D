@@ -156,7 +156,7 @@ function convertSkin(image) {
         ctx.clearRect(0, 0, 8, 8);
         ctx.clearRect(24, 0, 8, 8);
         ctx.clearRect(32, 0, 32, 16);
-        const out = new Image();
+        const out = new Canvas.Image;
         out.onload = () => resolve(out);
         out.onerror = e => {
             console.log(e);
